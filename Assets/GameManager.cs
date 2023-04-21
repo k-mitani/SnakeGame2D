@@ -67,7 +67,8 @@ public class GameManager : MonoBehaviour
             }
 
             var nextHeadCell = cells.GetNeighbor(headCell, currentDirection);
-            if (nextHeadCell == null || nextHeadCell.IsSnakeSegment)
+            if (nextHeadCell == null ||
+                (nextHeadCell.IsSnakeSegment && nextHeadCell != snakeSegments.Last.Value))
             {
                 StartCoroutine(GameOver());
                 yield break;
@@ -80,19 +81,18 @@ public class GameManager : MonoBehaviour
                 SpawnApple();
                 UpdateScore(score + 1);
             }
-
-            // 頭の位置を更新する。
-            nextHeadCell.SetSnakeSegment();
-            snakeSegments.AddFirst(nextHeadCell);
-
             // りんごがなければ末尾のセルをリセットする。
-            if (!appleExists)
+            else
             {
                 // 末尾のセルの状態をリセットする。
                 var lastCell = snakeSegments.Last.Value;
                 lastCell.ResetCell();
                 snakeSegments.RemoveLast();
             }
+
+            // 頭の位置を更新する。
+            nextHeadCell.SetSnakeSegment();
+            snakeSegments.AddFirst(nextHeadCell);
         }
     }
 
@@ -106,6 +106,7 @@ public class GameManager : MonoBehaviour
             var y = Random.Range(0, cellRowCount);
             var cell = cells.GetCell(x, y);
             if (cell.IsSnakeSegment) continue;
+            if (cell.IsApple) continue;
             cell.SetApple();
             return;
         }
